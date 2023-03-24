@@ -1,6 +1,6 @@
 import "./App.css";
 import { ForceGraph2D } from "react-force-graph";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function App() {
   const [graphData, setGraphData] = useState({
@@ -10,28 +10,26 @@ function App() {
 
   console.log(graphData);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setGraphData(({ nodes, links }) => {
-        const id = nodes.length;
-        return {
-          nodes: [...nodes, { id }],
-          links: [
-            ...links,
-            { source: id, target: Math.round(Math.random() * (id - 1)) },
-          ],
-        };
-      });
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  const handleBackgroundClick = useCallback(() => {
+    setGraphData((graphData) => {
+      const { nodes, links } = graphData;
+      const id = nodes.length;
+      return {
+        nodes: [...nodes, { id }],
+        links: [
+          ...links,
+          { source: id, target: Math.round(Math.random() * (id - 1)) },
+        ],
+      };
+    });
+  }, [graphData, setGraphData]);
 
   return (
     <div className="App">
-      <ForceGraph2D graphData={graphData} />
+      <ForceGraph2D
+        graphData={graphData}
+        onBackgroundClick={handleBackgroundClick}
+      />
     </div>
   );
 }
