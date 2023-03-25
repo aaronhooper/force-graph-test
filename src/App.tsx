@@ -4,10 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 
 async function getArtists(
   query: string,
-  limit: number
+  limit: number,
 ): Promise<Record<string, string>[]> {
   const apiKey = "269da84a1701721e5910142a21121af4";
-  const url = `//ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${query}&api_key=${apiKey}&limit=${limit}&format=json`;
+  const url =
+    `//ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${query}&api_key=${apiKey}&limit=${limit}&format=json`;
 
   const response = await fetch(url);
   const json = await response.json();
@@ -17,17 +18,18 @@ async function getArtists(
   }
 
   return json.similarartists.artist.map(
-    ({ name, url }: Record<string, string>) => ({ name, url })
+    ({ name, url }: Record<string, string>) => ({ name, url }),
   );
 }
 
 function App() {
   const limit = 5;
-  const [query, setQuery] = useState("");
-  const [graphData, setGraphData] = useState({
-    nodes: [{ id: 0, name: query }],
+  const graphDataInitialState = {
+    nodes: [{ id: 0 }],
     links: [],
-  });
+  };
+  const [query, setQuery] = useState("");
+  const [graphData, setGraphData] = useState(graphDataInitialState);
 
   console.log(graphData);
 
@@ -37,6 +39,8 @@ function App() {
 
   async function handleClick() {
     const artists = await getArtists(query, limit);
+
+    setGraphData(graphDataInitialState);
 
     setGraphData((prevGraphData: any): any => {
       const artistsWithIndex = artists.map((artist, index) => ({
