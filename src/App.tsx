@@ -36,6 +36,39 @@ function App() {
     setQuery(e.currentTarget.value);
   }
 
+  async function handleNodeClick(node) {
+    const { match, similar } = await getArtists(node.name, limit);
+
+    // add nodes
+    setGraphData((prevGraphData: any): any => {
+      const artistsWithIndex = similar.map((artist, index) => ({
+        ...artist,
+        id: index + prevGraphData.nodes.length,
+      }));
+
+      const newNodes = [...prevGraphData.nodes, ...artistsWithIndex];
+
+      return { ...prevGraphData, nodes: newNodes };
+    });
+
+    // add links
+    setGraphData((prevGraphData: any): any => {
+      const newLinks: Record<string, number>[] = [];
+      const newNodes = prevGraphData.nodes.slice(
+        prevGraphData.nodes.length - limit
+      );
+
+      newNodes.forEach((newNode: Record<any, any>, index: number) => {
+        newLinks.push({
+          source: node.id,
+          target: prevGraphData.nodes.length + index - limit,
+        });
+      });
+
+      return { ...prevGraphData, links: [...prevGraphData.links, ...newLinks] };
+    });
+  }
+
   async function handleClick() {
     const { match, similar } = await getArtists(query, limit);
 
@@ -86,7 +119,7 @@ function App() {
       <h1>Similar Artists Visualizer</h1>
       <input type="textbox" onChange={handleChange} />
       <button onClick={handleClick}>Search</button>
-      <ForceGraph2D graphData={graphData} />
+      <ForceGraph2D graphData={graphData} onNodeClick={handleNodeClick} />
     </div>
   );
 }
