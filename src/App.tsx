@@ -26,6 +26,9 @@ function App() {
 
   return (
     <div className="App">
+      <h1>Similar Artists Visualizer</h1>
+      <input type="textbox" />
+      <button>Search</button>
       <ForceGraph2D
         graphData={graphData}
         onBackgroundClick={handleBackgroundClick}
