@@ -4,12 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 
 async function getArtists(
   query: string,
-  limit: number,
-): Promise<Record<string, string>[]> {
+  limit: number
+): Promise<Record<string, any>> {
   const apiKey = "269da84a1701721e5910142a21121af4";
-  const url =
-    `//ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${query}&api_key=${apiKey}&limit=${limit}&format=json`;
-
+  const url = `//ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${query}&api_key=${apiKey}&limit=${limit}&format=json`;
   const response = await fetch(url);
   const json = await response.json();
 
@@ -17,9 +15,12 @@ async function getArtists(
     throw new Error(json.message);
   }
 
-  return json.similarartists.artist.map(
-    ({ name, url }: Record<string, string>) => ({ name, url }),
+  const artistMatch: string = json.similarartists["@attr"].artist;
+  const artists = json.similarartists.artist.map(
+    ({ name, url }: Record<string, string>) => ({ name, url })
   );
+
+  return { match: artistMatch, similar: artists };
 }
 
 function App() {
@@ -31,19 +32,19 @@ function App() {
   const [query, setQuery] = useState("");
   const [graphData, setGraphData] = useState(graphDataInitialState);
 
-  console.log(graphData);
-
   function handleChange(e: React.FormEvent<HTMLInputElement>) {
     setQuery(e.currentTarget.value);
   }
 
   async function handleClick() {
-    const artists = await getArtists(query, limit);
+    const { match, similar } = await getArtists(query, limit);
 
-    setGraphData(graphDataInitialState);
+    // reset graph
+    setGraphData({ ...graphDataInitialState, nodes: [{ id: 0, name: match }] });
 
+    // add nodes
     setGraphData((prevGraphData: any): any => {
-      const artistsWithIndex = artists.map((artist, index) => ({
+      const artistsWithIndex = similar.map((artist, index) => ({
         ...artist,
         id: index + prevGraphData.nodes.length,
       }));
@@ -53,6 +54,7 @@ function App() {
       return { ...prevGraphData, nodes: newNodes };
     });
 
+    // add links
     setGraphData((prevGraphData: any): any => {
       const newLinks: Record<string, number>[] = [];
 
