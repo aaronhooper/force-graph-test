@@ -108,7 +108,11 @@ function App() {
   return (
     <div className="App">
       <h1>Similar Artists Visualizer</h1>
-      <input type="textbox" onChange={handleChange} />
+      <input
+        type="textbox"
+        onChange={handleChange}
+        placeholder="artist/band/musician ..."
+      />
       <input type="number" value={limit} onChange={handleLimitChange} />
       <button onClick={handleClick}>Search</button>
       <ForceGraph2D graphData={graphData} onNodeClick={handleNodeClick} />
