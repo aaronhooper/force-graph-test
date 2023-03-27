@@ -24,11 +24,12 @@ async function getArtists(
 }
 
 function App() {
-  const limit = 5;
   const graphDataInitialState = {
     nodes: [{ id: 0 }],
     links: [],
   };
+
+  const [limit, setLimit] = useState(5);
   const [query, setQuery] = useState("");
   const [graphData, setGraphData] = useState(graphDataInitialState);
 
@@ -100,10 +101,15 @@ function App() {
     });
   }
 
+  function handleLimitChange(e) {
+    setLimit(e.currentTarget.value);
+  }
+
   return (
     <div className="App">
       <h1>Similar Artists Visualizer</h1>
       <input type="textbox" onChange={handleChange} />
+      <input type="number" value={limit} onChange={handleLimitChange} />
       <button onClick={handleClick}>Search</button>
       <ForceGraph2D graphData={graphData} onNodeClick={handleNodeClick} />
     </div>
