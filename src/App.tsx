@@ -38,16 +38,32 @@ function App() {
   }
 
   async function handleNodeClick(node) {
-    const { match, similar } = await getArtists(node.name, limit);
+    const { similar } = await getArtists(node.name, limit);
+    const duplicates: string[] = [];
 
     // add nodes
     setGraphData((prevGraphData: any): any => {
-      const artistsWithIndex = similar.map((artist, index) => ({
-        ...artist,
-        id: index + prevGraphData.nodes.length,
-      }));
+      const newSimilarArtists = similar.map((artist) => {
+        return { ...artist };
+      });
 
-      const newNodes = [...prevGraphData.nodes, ...artistsWithIndex];
+      for (let i = 0; i < newSimilarArtists.length; i++) {
+        for (let j = 0; j < prevGraphData.nodes.length; j++) {
+          if (newSimilarArtists[i].name === prevGraphData.nodes[j].name) {
+            const [removed] = newSimilarArtists.splice(i, 1);
+            duplicates.push(removed.name);
+            break;
+          }
+        }
+      }
+
+      const newSimilarArtistsWithId = newSimilarArtists.map(
+        (artist, index) => ({
+          ...artist,
+          id: prevGraphData.nodes.length + index,
+        })
+      );
+      const newNodes = [...prevGraphData.nodes, ...newSimilarArtistsWithId];
 
       return { ...prevGraphData, nodes: newNodes };
     });
@@ -63,6 +79,17 @@ function App() {
         newLinks.push({
           source: node.id,
           target: prevGraphData.nodes.length + index - limit,
+        });
+      });
+
+      duplicates.forEach((artistName) => {
+        const duplicateArtist = prevGraphData.nodes.find(
+          (artist) => artist.name === artistName
+        );
+
+        newLinks.push({
+          source: node.id,
+          target: duplicateArtist.id,
         });
       });
 
