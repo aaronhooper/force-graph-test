@@ -100,20 +100,6 @@ function App() {
     });
   }
 
-  const handleBackgroundClick = useCallback(() => {
-    setGraphData((graphData: any): any => {
-      const { nodes, links } = graphData;
-      const id = nodes.length;
-      return {
-        nodes: [...nodes, { id }],
-        links: [
-          ...links,
-          { source: id, target: Math.round(Math.random() * (id - 1)) },
-        ],
-      };
-    });
-  }, [graphData, setGraphData]);
-
   return (
     <div className="App">
       <h1>Similar Artists Visualizer</h1>
