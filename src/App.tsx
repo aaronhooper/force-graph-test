@@ -97,7 +97,7 @@ function App() {
     });
   }
 
-  async function handleClick() {
+  async function handleButtonClick() {
     const { match, similar } = await getArtists(query, limit);
 
     // reset graph
@@ -141,7 +141,7 @@ function App() {
         placeholder="artist/band/musician ..."
       />
       <input type="number" value={limit} onChange={handleLimitChange} />
-      <button onClick={handleClick}>Search</button>
+      <button onClick={handleButtonClick}>Search</button>
       <ForceGraph2D graphData={graphData} onNodeClick={handleNodeClick} />
     </div>
   );
