@@ -33,7 +33,7 @@ function App() {
   const [query, setQuery] = useState("");
   const [graphData, setGraphData] = useState(graphDataInitialState);
 
-  function handleChange(e: React.FormEvent<HTMLInputElement>) {
+  function handleTextboxChange(e: React.FormEvent<HTMLInputElement>) {
     setQuery(e.currentTarget.value);
   }
 
@@ -137,7 +137,7 @@ function App() {
       <h1>Similar Artists Visualizer</h1>
       <input
         type="textbox"
-        onChange={handleChange}
+        onChange={handleTextboxChange}
         placeholder="artist/band/musician ..."
       />
       <input type="number" value={limit} onChange={handleLimitChange} />
