@@ -1,6 +1,6 @@
 import "./App.css";
 import { ForceGraph2D } from "react-force-graph";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 
 async function getArtists(
   query: string,
