@@ -50,6 +50,7 @@ function App() {
           acc.push({
             ...prevGraphData.nodes[prevArtistIndex],
           });
+
           return acc;
         }
 
@@ -57,7 +58,11 @@ function App() {
       }, []);
 
       const newNodes = similar.reduce((acc, artist, index) => {
-        if (duplicates.every((duplicate) => artist.name !== duplicate.name)) {
+        const artistIsNotDuplicate = duplicates.every(
+          (duplicate) => artist.name !== duplicate.name
+        );
+
+        if (artistIsNotDuplicate) {
           acc.push({ ...artist, id: prevGraphData.nodes.length + index });
           return acc;
         }
