@@ -39,61 +39,52 @@ function App() {
 
   async function handleNodeClick(node) {
     const { similar } = await getArtists(node.name, limit);
-    const duplicates: string[] = [];
 
-    // add nodes
     setGraphData((prevGraphData: any): any => {
-      const newSimilarArtists = similar.map((artist) => {
-        return { ...artist };
-      });
-
-      for (let i = 0; i < newSimilarArtists.length; i++) {
-        for (let j = 0; j < prevGraphData.nodes.length; j++) {
-          if (newSimilarArtists[i].name === prevGraphData.nodes[j].name) {
-            const [removed] = newSimilarArtists.splice(i, 1);
-            duplicates.push(removed.name);
-            break;
-          }
-        }
-      }
-
-      const newSimilarArtistsWithId = newSimilarArtists.map(
-        (artist, index) => ({
-          ...artist,
-          id: prevGraphData.nodes.length + index,
-        })
-      );
-      const newNodes = [...prevGraphData.nodes, ...newSimilarArtistsWithId];
-
-      return { ...prevGraphData, nodes: newNodes };
-    });
-
-    // add links
-    setGraphData((prevGraphData: any): any => {
-      const newLinks: Record<string, number>[] = [];
-      const newNodes = prevGraphData.nodes.slice(
-        prevGraphData.nodes.length - limit
-      );
-
-      newNodes.forEach((newNode: Record<any, any>, index: number) => {
-        newLinks.push({
-          source: node.id,
-          target: prevGraphData.nodes.length + index - limit,
-        });
-      });
-
-      duplicates.forEach((artistName) => {
-        const duplicateArtist = prevGraphData.nodes.find(
-          (artist) => artist.name === artistName
+      const duplicates = similar.reduce((acc, artist) => {
+        const prevArtistIndex = prevGraphData.nodes.findIndex(
+          (prevArtist) => artist.name === prevArtist.name
         );
 
+        if (prevArtistIndex !== -1) {
+          acc.push({
+            ...prevGraphData.nodes[prevArtistIndex],
+          });
+          return acc;
+        }
+
+        return acc;
+      }, []);
+
+      const newNodes = similar.reduce((acc, artist, index) => {
+        if (duplicates.every((duplicate) => artist.name !== duplicate.name)) {
+          acc.push({ ...artist, id: prevGraphData.nodes.length + index });
+          return acc;
+        }
+
+        return acc;
+      }, []);
+
+      const newLinks: Record<string, number>[] = [];
+
+      newNodes.forEach((newNode) => {
         newLinks.push({
           source: node.id,
-          target: duplicateArtist.id,
+          target: newNode.id,
         });
       });
 
-      return { ...prevGraphData, links: [...prevGraphData.links, ...newLinks] };
+      duplicates.forEach((duplicate) => {
+        newLinks.push({
+          source: node.id,
+          target: duplicate.id,
+        });
+      });
+
+      return {
+        nodes: [...prevGraphData.nodes, ...newNodes],
+        links: [...prevGraphData.links, ...newLinks],
+      };
     });
   }
 
@@ -103,6 +94,7 @@ function App() {
     // reset graph
     setGraphData({ ...graphDataInitialState, nodes: [{ id: 0, name: match }] });
 
+    // TODO: merge separate state functions together
     // add nodes
     setGraphData((prevGraphData: any): any => {
       const artistsWithIndex = similar.map((artist, index) => ({
