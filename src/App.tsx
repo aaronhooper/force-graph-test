@@ -54,7 +54,7 @@ function App() {
 
           acc[0].push({
             ...artist,
-            id: prevGraphData.nodes.length + index,
+            id: prevGraphData.nodes.at(-1).id + 1 + index,
           });
           return acc;
         },
