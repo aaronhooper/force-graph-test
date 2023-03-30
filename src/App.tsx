@@ -7,7 +7,7 @@ async function getArtists(
   limit: number
 ): Promise<Record<string, any>> {
   const apiKey = "269da84a1701721e5910142a21121af4";
-  const url = `//ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${query}&api_key=${apiKey}&limit=${limit}&format=json`;
+  const url = `http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${query}&api_key=${apiKey}&limit=${limit}&format=json`;
   const response = await fetch(url);
   const json = await response.json();
 
