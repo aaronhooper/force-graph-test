@@ -87,32 +87,23 @@ function App() {
   async function handleButtonClick() {
     const { match, similar } = await getArtists(query, limit);
 
-    // reset graph
     setGraphData({ ...graphDataInitialState, nodes: [{ id: 0, name: match }] });
 
-    // TODO: merge separate state functions together
-    // add nodes
     setGraphData((prevGraphData: any): any => {
-      const artistsWithIndex = similar.map((artist, index) => ({
+      const newNodes = similar.map((artist, index) => ({
         ...artist,
-        id: index + prevGraphData.nodes.length,
+        id: prevGraphData.nodes.length + index,
       }));
 
-      const newNodes = [...prevGraphData.nodes, ...artistsWithIndex];
+      const newLinks = newNodes.map((artist) => ({
+        source: 0,
+        target: artist.id,
+      }));
 
-      return { ...prevGraphData, nodes: newNodes };
-    });
-
-    // add links
-    setGraphData((prevGraphData: any): any => {
-      const newLinks: Record<string, number>[] = [];
-
-      prevGraphData.nodes.forEach((node: Record<any, any>, index: number) => {
-        if (node.id === 0) return;
-        newLinks.push({ source: 0, target: index });
-      });
-
-      return { ...prevGraphData, links: [...newLinks] };
+      return {
+        nodes: [...prevGraphData.nodes, ...newNodes],
+        links: [...prevGraphData.links, ...newLinks],
+      };
     });
   }
 
