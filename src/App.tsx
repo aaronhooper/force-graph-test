@@ -1,6 +1,8 @@
 import "./App.css";
 import { ForceGraph2D } from "react-force-graph";
+import { toast, ToastContainer } from "react-toastify";
 import { useState } from "react";
+import "react-toastify/dist/ReactToastify.css";
 
 async function getArtists(
   query: string,
@@ -38,73 +40,84 @@ function App() {
   }
 
   async function handleNodeClick(node) {
-    const { similar } = await getArtists(node.name, limit);
+    try {
+      const { similar } = await getArtists(node.name, limit);
 
-    setGraphData((prevGraphData: any): any => {
-      const [newNodes, duplicateNodes] = similar.reduce(
-        (acc, artist, index) => {
-          const existingArtist = prevGraphData.nodes.find(
-            (prevArtist) => prevArtist.name === artist.name
-          );
+      setGraphData((prevGraphData: any): any => {
+        const [newNodes, duplicateNodes] = similar.reduce(
+          (acc, artist, index) => {
+            const existingArtist = prevGraphData.nodes.find(
+              (prevArtist) => prevArtist.name === artist.name
+            );
 
-          if (existingArtist) {
-            acc[1].push(existingArtist);
+            if (existingArtist) {
+              acc[1].push(existingArtist);
+              return acc;
+            }
+
+            acc[0].push({
+              ...artist,
+              id: prevGraphData.nodes.at(-1).id + 1 + index,
+            });
             return acc;
-          }
+          },
+          [[], []]
+        );
 
-          acc[0].push({
-            ...artist,
-            id: prevGraphData.nodes.at(-1).id + 1 + index,
+        const newLinks: Record<string, number>[] = [];
+
+        newNodes.forEach((newNode) => {
+          newLinks.push({
+            source: node.id,
+            target: newNode.id,
           });
-          return acc;
-        },
-        [[], []]
-      );
-
-      const newLinks: Record<string, number>[] = [];
-
-      newNodes.forEach((newNode) => {
-        newLinks.push({
-          source: node.id,
-          target: newNode.id,
         });
-      });
 
-      duplicateNodes.forEach((duplicate) => {
-        newLinks.push({
-          source: node.id,
-          target: duplicate.id,
+        duplicateNodes.forEach((duplicate) => {
+          newLinks.push({
+            source: node.id,
+            target: duplicate.id,
+          });
         });
-      });
 
-      return {
-        nodes: [...prevGraphData.nodes, ...newNodes],
-        links: [...prevGraphData.links, ...newLinks],
-      };
-    });
+        return {
+          nodes: [...prevGraphData.nodes, ...newNodes],
+          links: [...prevGraphData.links, ...newLinks],
+        };
+      });
+    } catch (e: any) {
+      toast(e.message);
+    }
   }
 
   async function handleButtonClick() {
-    const { match, similar } = await getArtists(query, limit);
+    try {
+      const { match, similar } = await getArtists(query, limit);
 
-    setGraphData({ ...graphDataInitialState, nodes: [{ id: 0, name: match }] });
+      setGraphData({
+        ...graphDataInitialState,
+        nodes: [{ id: 0, name: match }],
+      });
 
-    setGraphData((prevGraphData: any): any => {
-      const newNodes = similar.map((artist, index) => ({
-        ...artist,
-        id: prevGraphData.nodes.length + index,
-      }));
+      setGraphData((prevGraphData: any): any => {
+        const newNodes = similar.map((artist, index) => ({
+          ...artist,
+          id: prevGraphData.nodes.length + index,
+        }));
 
-      const newLinks = newNodes.map((artist) => ({
-        source: 0,
-        target: artist.id,
-      }));
+        const newLinks = newNodes.map((artist) => ({
+          source: 0,
+          target: artist.id,
+        }));
 
-      return {
-        nodes: [...prevGraphData.nodes, ...newNodes],
-        links: [...prevGraphData.links, ...newLinks],
-      };
-    });
+        return {
+          nodes: [...prevGraphData.nodes, ...newNodes],
+          links: [...prevGraphData.links, ...newLinks],
+        };
+      });
+    } catch (e: any) {
+      toast(e.message);
+    }
   }
 
   function handleLimitChange(e) {
@@ -113,6 +126,7 @@ function App() {
 
   return (
     <div className="App">
+      <ToastContainer />
       <h1>Similar Artists Visualizer</h1>
       <input
         type="textbox"
