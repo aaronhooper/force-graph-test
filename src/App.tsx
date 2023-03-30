@@ -41,34 +41,25 @@ function App() {
     const { similar } = await getArtists(node.name, limit);
 
     setGraphData((prevGraphData: any): any => {
-      const duplicates = similar.reduce((acc, artist) => {
-        const prevArtistIndex = prevGraphData.nodes.findIndex(
-          (prevArtist) => artist.name === prevArtist.name
-        );
+      const [newNodes, duplicateNodes] = similar.reduce(
+        (acc, artist, index) => {
+          const existingArtist = prevGraphData.nodes.find(
+            (prevArtist) => prevArtist.name === artist.name
+          );
 
-        if (prevArtistIndex !== -1) {
-          acc.push({
-            ...prevGraphData.nodes[prevArtistIndex],
+          if (existingArtist) {
+            acc[1].push(existingArtist);
+            return acc;
+          }
+
+          acc[0].push({
+            ...artist,
+            id: prevGraphData.nodes.length + index,
           });
-
           return acc;
-        }
-
-        return acc;
-      }, []);
-
-      const newNodes = similar.reduce((acc, artist, index) => {
-        const artistIsNotDuplicate = duplicates.every(
-          (duplicate) => artist.name !== duplicate.name
-        );
-
-        if (artistIsNotDuplicate) {
-          acc.push({ ...artist, id: prevGraphData.nodes.length + index });
-          return acc;
-        }
-
-        return acc;
-      }, []);
+        },
+        [[], []]
+      );
 
       const newLinks: Record<string, number>[] = [];
 
@@ -79,7 +70,7 @@ function App() {
         });
       });
 
-      duplicates.forEach((duplicate) => {
+      duplicateNodes.forEach((duplicate) => {
         newLinks.push({
           source: node.id,
           target: duplicate.id,
